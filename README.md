@@ -1,5 +1,9 @@
 # m2l
 bb
+
+
+# Pour récupérer les packages, taper la commande ci-dessous après avoir récupérer le contenu du répertoire
+#
 # flutter packages get
 
 A new Flutter project.
