@@ -1,5 +1,5 @@
 # m2l
-bb modification par dev-kath lolololol
+bb modification par dev-abde lolololol
 
 
 # Pour récupérer les packages, taper la commande ci-dessous après avoir récupérer le contenu du répertoire
