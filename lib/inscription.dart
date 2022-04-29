@@ -22,7 +22,11 @@ class Inscription extends StatelessWidget {
             DelayedAnimation(
                 delay: 1000,
                 child: Container(
-                    height: 100, child: Image.asset('assets/images/logo.png'))),
+                    height: 200,
+                    child: Image.asset('assets/images/logo_rond.png'))),
+            const SizedBox(
+              height: 50,
+            ),
             const DelayedAnimation(delay: 1500, child: FormInscription())
           ]),
         )));
@@ -158,15 +162,18 @@ class _FormInscriptionState extends State<FormInscription> {
             style: ElevatedButton.styleFrom(
                 primary: couleurJaune,
                 shape: const StadiumBorder(),
-                padding: const EdgeInsets.all(10)),
-            child: const Text('INSCRIPTION'),
+                padding: const EdgeInsets.only(
+                    top: 12, bottom: 12, left: 25, right: 25)),
+            child: const Text('INSCRIPTION', style: TextStyle(fontSize: 17)),
             onPressed: () {
               // Redirection vers l'accueil en tant qu'utilisateur en demande d'inscription
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          const Accueil('Utilisateur inscrit')));
+                      builder: (context) => const Accueil(
+                            statutConnexion: 'non connecte',
+                            userConnect: null,
+                          )));
             },
           )
         ],

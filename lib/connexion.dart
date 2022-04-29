@@ -28,22 +28,26 @@ class Connexion extends StatelessWidget {
             DelayedAnimation(
                 delay: 800,
                 child: Container(
-                    height: 100, child: Image.asset('assets/images/logo.png'))),
+                    height: 200,
+                    child: Image.asset('assets/images/logo_rond.png'))),
             const SizedBox(
-              height: 60,
+              height: 50,
             ),
             // Formulaire de connexion
             const DelayedAnimation(delay: 1000, child: FormConnexion()),
             const SizedBox(
-              height: 50,
+              height: 30,
             ),
             // Notification de demande d'inscription
-            const DelayedAnimation(
+            DelayedAnimation(
                 delay: 1500,
                 child: Text(
                     'Vous n\'avez pas de compte ? Cliquez ici pour vous inscrire.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, fontSize: 13))),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13))),
+            const SizedBox(
+              height: 10,
+            ),
             // Bouton de redirection vers la page d'inscription
             DelayedAnimation(
                 delay: 2000,
@@ -54,7 +58,10 @@ class Connexion extends StatelessWidget {
                           primary: couleurJaune,
                           shape: const StadiumBorder(),
                           padding: const EdgeInsets.all(10)),
-                      child: const Text('INSCRIPTION'),
+                      child: const Text(
+                        'INSCRIPTION',
+                        style: TextStyle(fontSize: 18),
+                      ),
                       onPressed: () {
                         Navigator.push(
                             context,
@@ -155,16 +162,18 @@ class _FormConnexionState extends State<FormConnexion> {
             style: ElevatedButton.styleFrom(
                 primary: couleurJaune,
                 shape: const StadiumBorder(),
-                padding: const EdgeInsets.all(10)),
-            child: const Text('CONNEXION'),
+                padding: const EdgeInsets.only(
+                    top: 12, bottom: 12, left: 25, right: 25)),
+            child: const Text(
+              'CONNEXION',
+              style: TextStyle(fontSize: 17),
+            ),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 // Authentification
-                var email = 'moi@gmail.com';
-                var mdp = 'moi';
                 var reponse =
                     // await api.connexion(saisieEmail.text, saisieMdp.text);
-                    await api.connexion(email, mdp);
+                    await api.connexion(saisieEmail.text, saisieMdp.text);
 
                 // Vérification de la réponse d'authentification
                 if (reponse['statut'] == 'on') {
@@ -172,8 +181,10 @@ class _FormConnexionState extends State<FormConnexion> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              Accueil(reponse['utilisateur'])));
+                          builder: (context) => Accueil(
+                                statutConnexion: 'connecte',
+                                userConnect: reponse['utilisateur'],
+                              )));
                 } else if (reponse['statut'] == 'invalide') {
                 } else {
                   // Redirection vers la page d'inscription pour les non inscrits

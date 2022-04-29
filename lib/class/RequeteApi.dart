@@ -48,10 +48,15 @@ class RequeteApi {
         // Vérification des statuts de connexion
         if (dataUser['info'] == 'on') {
           // Connexion au compte utilisateur
-          User(dataUser['id'], dataUser['statut'], dataUser['email'],
-              dataUser['niveauTarif'], dataUser['droitReservation']);
+          final userConnect = User(
+              dataUser['id'],
+              dataUser['statut'],
+              dataUser['email'],
+              dataUser['niveauTarif'],
+              dataUser['droitReservation']);
           // Confirmation de la connexion
-          return {'statut': 'on', 'utilisateur': dataUser['email']};
+          // return {'statut': 'on', 'utilisateur': dataUser['email']};
+          return {'statut': 'on', 'utilisateur': userConnect};
         } else {
           // Traitement en cas de non connexion
           return {'statut': dataUser['info']};

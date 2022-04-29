@@ -5,6 +5,12 @@ import 'package:m2l/accueil.dart';
 const couleurBleu = Color(0xFF2b4c88);
 const couleurRouge = Color(0xFFe02131);
 const couleurJaune = Color(0xFFfec816);
+const couleurJaune2 = Color(0xFFFAD658);
+const couleurJauneClair = Color(0xFFFFF3D1);
+const couleurOrangePale = Color(0xFFD485);
+const couleurPale = Color.fromARGB(121, 39, 38, 38);
+// const
+const orangePale = Color(0xFFffd485);
 
 void main() async {
   runApp(const MyApp());
@@ -24,7 +30,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: const Accueil(),
-      home: const Accueil('Utilisateur non connecté'),
+      home: const Accueil(
+        statutConnexion: 'non connecte',
+        userConnect: null,
+      ),
     );
   }
 }
