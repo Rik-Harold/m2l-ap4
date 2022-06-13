@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:m2l/animations/affichage_anime.dart';
 import 'package:m2l/class/RequeteApi.dart';
 import 'package:m2l/navBar.dart';
-import 'package:m2l/salles/form.dart';
+import 'package:m2l/reservations/view.dart';
 import 'package:m2l/main.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 
@@ -31,14 +31,16 @@ class Reservations extends StatelessWidget {
         body: SingleChildScrollView(
             child: Container(
           margin: const EdgeInsets.symmetric(vertical: 25, horizontal: 30),
-          child: const DelayedAnimation(delay: 1000, child: FormReservations()),
+          child: DelayedAnimation(
+              delay: 1000, child: FormReservations(dataUser: userData)),
         )));
   }
 }
 
 // Page de Reservations à l'application
 class FormReservations extends StatefulWidget {
-  const FormReservations({Key? key}) : super(key: key);
+  final dynamic dataUser;
+  const FormReservations({Key? key, required this.dataUser}) : super(key: key);
 
   // String dateFin = '';
 
@@ -49,17 +51,12 @@ class FormReservations extends StatefulWidget {
 class _FormReservationsState extends State<FormReservations> {
   // Clé du formulaire
   final _formKey = GlobalKey<FormState>();
-
-  // Requête d'authentification
-  // Future<String> Reservations(email, mdp) async {
-  //   // Reservations à l'API
-  //   return await api.Reservations(email, mdp);
-  // }
+  String currentDate = DateTime.now().toString().substring(0, 10);
 
   // Déinition et initialisation de la valeur par défaut des choix
   int domaine = 1;
+  int nomSalle = 5;
   String periodicite = 'Jour';
-  String nomSalle = 'Salle 1';
   String type = 'Amphithéâtre';
   String nomDomaine = 'Plongée sous-marine';
 
@@ -68,6 +65,30 @@ class _FormReservationsState extends State<FormReservations> {
   var descriptionBreve = TextEditingController();
   String? dateHeureDebut;
   String? dateHeureFin;
+
+  // Requête de création
+  Future<dynamic> createReservation(
+      breveDescription,
+      descriptionComplete,
+      dateHeureDebut,
+      dateHeureUpdate,
+      dateHeureFin,
+      idUtilisateur,
+      tarifReservation,
+      idSalle,
+      idDomaine) async {
+    // Lancement de la requête
+    return await api.createReservation(
+        breveDescription,
+        descriptionComplete,
+        dateHeureDebut,
+        dateHeureUpdate,
+        dateHeureFin,
+        idUtilisateur,
+        tarifReservation,
+        idSalle,
+        idDomaine);
+  }
 
   // Initialisation des saisies du formulaire
   @override
@@ -90,15 +111,15 @@ class _FormReservationsState extends State<FormReservations> {
           // Titre du formulaire de réservation
           const Center(
             child: Text(
-              'RESERVATION',
+              'FORMULAIRE DE RESERVATION',
               style: TextStyle(
                   color: couleurBleu,
-                  fontSize: 25,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(
-            height: 20,
+            height: 15,
           ),
           // Titre de la réservation
           TextFormField(
@@ -124,7 +145,7 @@ class _FormReservationsState extends State<FormReservations> {
               labelText: 'Description',
               labelStyle: TextStyle(color: couleurBleu),
             ),
-            maxLines: 3,
+            maxLines: 2,
             maxLength: 300,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -154,12 +175,15 @@ class _FormReservationsState extends State<FormReservations> {
               }
               return true;
             },
-            onChanged: (val) {},
+            onChanged: (val) {
+              // Enregistrement de la date et l'heure de début de réservation
+              dateHeureDebut = val;
+            },
             validator: (selectedDate) {
               if (selectedDate != null) {
                 DateTime selected = DateTime.parse(selectedDate);
                 if (selected.difference(DateTime.now()).isNegative) {
-                  return 'La date doit être ultérieure';
+                  return 'Revérifiez la date';
                 }
               } else {
                 return "Date nulle";
@@ -192,12 +216,15 @@ class _FormReservationsState extends State<FormReservations> {
               }
               return true;
             },
-            onChanged: (val) {},
+            onChanged: (val) {
+              // Enregistrement de la date et l'heure de début de réservation
+              dateHeureFin = val;
+            },
             validator: (selectedDate) {
               if (selectedDate != null) {
                 DateTime selected = DateTime.parse(selectedDate);
                 if (selected.difference(DateTime.now()).isNegative) {
-                  return 'La date doit être ultérieure';
+                  return 'Revérifiez la date';
                 }
               } else {
                 return "Date nulle";
@@ -349,14 +376,17 @@ class _FormReservationsState extends State<FormReservations> {
                       switch (newValue) {
                         case 'Pétanque':
                           domaine = 2;
+                          nomSalle = 1;
                           nomDomaine = newValue!;
                           break;
                         case 'Tennis':
                           domaine = 3;
+                          nomSalle = 6;
                           nomDomaine = newValue!;
                           break;
                         default:
                           domaine = 1;
+                          nomSalle = 5;
                           nomDomaine = newValue!;
                       }
                     });
@@ -390,37 +420,11 @@ class _FormReservationsState extends State<FormReservations> {
                 width: 15,
               ),
               Expanded(
-                child: DropdownButton<String>(
-                  value: nomSalle,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  isExpanded: true,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      // Modification dynamique
-                      switch (newValue) {
-                        case 'Salle 2':
-                          domaine = 2;
-                          nomSalle = newValue!;
-                          break;
-                        case 'Salle 3':
-                          domaine = 3;
-                          nomSalle = newValue!;
-                          break;
-                        default:
-                          domaine = 1;
-                          nomSalle = newValue!;
-                      }
-                    });
-                  },
-                  items: <String>['Salle 1', 'Salle 2', 'Salle 3']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                child: GetSalles(
+                  indomaine: domaine,
+                  initSalle: nomSalle,
                 ),
-              ),
+              )
             ],
           ),
           const SizedBox(
@@ -439,36 +443,64 @@ class _FormReservationsState extends State<FormReservations> {
                 child: const Text('Réserver',
                     style: TextStyle(fontSize: 20, letterSpacing: 2)),
                 onPressed: () async {
-                  Navigator.push(
+                  /*Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const Salles(action: 'Modification')));
-                  // if (_formKey.currentState!.validate()) {
-                  //   // Authentification
-                  //   var email = 'moi@gmail.com';
-                  //   var mdp = 'moi';
-                  //   var reponse =
-                  //       // await api.Reservations(saisieEmail.text, saisieMdp.text);
-                  //       await api.Reservations(email, mdp);
+                              const Salles(action: 'Modification')));*/
+                  if (_formKey.currentState!.validate()) {
+                    // Requête
+                    // dynamic reponse = await createReservation(
+                    //     descriptionBreve.text,
+                    //     descriptionComplete.text,
+                    //     dateHeureDebut,
+                    //     currentDate,
+                    //     dateHeureFin,
+                    //     widget.dataUser.id,
+                    //     widget.dataUser.niveauTarif,
+                    //     domaine,
+                    //     nomSalle);
 
-                  //   // Vérification de la réponse d'authentification
-                  //   if (reponse['statut'] == 'on') {
-                  //     // Redirection vers l'accueil pour les visiteurs inscrits
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) =>
-                  //                 Accueil(reponse['utilisateur'])));
-                  //   } else if (reponse['statut'] == 'invalide') {
-                  //   } else {
-                  //     // Redirection vers la page d'inscription pour les non inscrits
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => const Inscription()));
-                  //   }
-                  // }
+                    print('Requête vers l\'API');
+                    // print(dateHeureDebut! + ' à ' + dateHeureFin!);
+                    // print(dateHeureDebut!);
+                    print(dateHeureFin!);
+                    print('l\'id de l\'utilisateur est : ' +
+                        widget.dataUser.getId().toString());
+                    print('Le domaine est ' + domaine.toString());
+                    print('La salle sélectionneée est ' + nomSalle.toString());
+                    print('Tarif : ' + widget.dataUser.getTarif().toString());
+
+                    /*dynamic reponse = await api.createReservation(
+                        descriptionBreve.text,
+                        descriptionComplete.text,
+                        dateHeureDebut,
+                        currentDate,
+                        dateHeureFin,
+                        widget.dataUser.getId(),
+                        widget.dataUser.getTarif(),
+                        nomSalle,
+                        domaine);
+
+                    // Vérification de la réponse d'authentification
+                    if (reponse['statut'].toString() == 'on') {
+                      // Redirection vers la liste des réservations
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MesReservations(
+                                    dataUser: widget.dataUser,
+                                  )));
+                    } else {
+                      // Réactualisation de la page de formulaire
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Reservations(
+                                    userData: widget.dataUser,
+                                  )));
+                    }*/
+                  }
                 },
               ),
             ),
@@ -476,5 +508,124 @@ class _FormReservationsState extends State<FormReservations> {
         ],
       ),
     );
+  }
+}
+
+// CLASS DE RECUPERATION DES SALLES
+class GetSalles extends StatefulWidget {
+  int indomaine;
+  int initSalle;
+  GetSalles({Key? key, required this.indomaine, required this.initSalle});
+
+  @override
+  State<GetSalles> createState() => _GetSallesState();
+}
+
+// Formatage du Salles
+class _GetSallesState extends State<GetSalles> {
+  // Variables de récupération des salles du domaine 1
+  late Iterable<dynamic> reservationsDomaine;
+
+  @override
+  void didUpdateWidget(GetSalles planning) {
+    super.didUpdateWidget(planning);
+  }
+
+  // Récupération des données du planning
+  Future<dynamic> getPlanningData() async {
+    return await api.getPlanningData();
+  }
+
+/*
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<dynamic>(
+        future: getPlanningData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // Récupération des salles du domaine sélectionné
+            reservationsDomaine = snapshot.data!['salles']
+                .where((salle) => salle['area_id'] == widget.indomaine);
+            // Formatage des réservations de chaque salle du domaine sélectionné
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 100,
+                  child: const Text(
+                    'Salle : ',
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: couleurBleu,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Expanded(
+                  child: DropdownButton<dynamic>(
+                    value: nomSalle,
+                    icon: const Icon(Icons.arrow_drop_down),
+                    isExpanded: true,
+                    onChanged: (dynamic newValue) {
+                      setState(() {
+                        // Modification dynamique
+                        idSalle = int.parse(newValue!['id']);
+                        nomSalle = newValue!['name'].toString();
+                      });
+                    },
+                    items: reservationsDomaine
+                        .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                      return DropdownMenuItem<dynamic>(
+                        value: {
+                          'id': value['id'],
+                          'name': value['name'],
+                        },
+                        child: Text(value['name'].toString()),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return const Center(child: Text('Pas de données'));
+          }
+        });
+  }
+*/
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<dynamic>(
+        future: getPlanningData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // Récupération des salles du domaine sélectionné
+            reservationsDomaine = snapshot.data!['salles']
+                .where((salle) => salle['area_id'] == widget.indomaine);
+            // Formatage des réservations de chaque salle du domaine sélectionné
+            return DropdownButton<int>(
+              value: widget.initSalle,
+              icon: const Icon(Icons.arrow_drop_down),
+              isExpanded: true,
+              onChanged: (int? newValue) {
+                setState(() {
+                  // Mise à jour de l'identifiant
+                  widget.initSalle = newValue!;
+                });
+              },
+              items: reservationsDomaine
+                  .map<DropdownMenuItem<int>>((dynamic value) {
+                return DropdownMenuItem<int>(
+                  value: value['id'],
+                  child: Text(value['room_name'].toString()),
+                );
+              }).toList(),
+            );
+          } else {
+            return const Center(child: Text('Pas de données'));
+          }
+        });
   }
 }

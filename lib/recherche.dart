@@ -28,27 +28,15 @@ class Recherche extends StatefulWidget {
 
 class _RechercheState extends State<Recherche> {
   // Déclaration de variable
-  // final idUser;
-
-  // Constructeur
-
-  // Variable de stockage de la donnée
-  // late Future<dynamic> dataUser;
-
-  var listeReservation = [
-    {'name': 'Réservation 1', 'date': '12/11/2021', 'salle': 1, 'domaine': 2},
-    {'name': 'Réservation 2', 'date': '12/11/2021', 'salle': 2, 'domaine': 1},
-    {'name': 'Réservation 3', 'date': '12/11/2021', 'salle': 3, 'domaine': 1},
-    {'name': 'Réservation 4', 'date': '12/11/2021', 'salle': 2, 'domaine': 3},
-    {'name': 'Réservation 1', 'date': '12/11/2021', 'salle': 1, 'domaine': 2},
-    {'name': 'Réservation 2', 'date': '12/11/2021', 'salle': 2, 'domaine': 1},
-    {'name': 'Réservation 3', 'date': '12/11/2021', 'salle': 3, 'domaine': 1},
-    {'name': 'Réservation 4', 'date': '12/11/2021', 'salle': 2, 'domaine': 3}
-  ];
+  String newSaisie = '';
 
   @override
   Widget build(BuildContext context) {
+    // Initialisation de la première saisie
+    newSaisie = widget.saisie;
+
     return Scaffold(
+      backgroundColor: couleurOrangePale,
       drawer: widget.statutConnexion == 'connecte'
           ? NavBar(
               userConnect: widget.userConnect,
@@ -66,29 +54,50 @@ class _RechercheState extends State<Recherche> {
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Container(
             child: Column(children: [
+              // Barre de recherche
               DelayedAnimation(
                   delay: 1000,
                   child: BarreRecherche(
-                    saisie: widget.saisie,
+                    saisie: newSaisie,
                   )),
               const SizedBox(
                 height: 20,
               ),
-              // Liste des réservations correspondant à la recherche
-              for (var reservation in listeReservation)
+              /*/ Liste des réservations correspondant à la recherche
+              for (var reservation in listeReservation.where((reservation) =>
+                  reservation['name']
+                      .toString()
+                      .toLowerCase()
+                      .contains(newSaisie.toLowerCase())))
                 DelayedAnimation(
-                    delay: 2000,
+                    delay: 1500,
                     child: Container(
-                      width: double.infinity,
-                      height: 100,
-                      decoration: BoxDecoration(
-                          color: couleurJaune,
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 5, horizontal: 10),
-                      child: Text(reservation['name'].toString()),
-                    )),
+                        width: double.infinity,
+                        height: 100,
+                        decoration: BoxDecoration(
+                            color: couleurJaune,
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        child: Column(
+                          children: [
+                            Text(
+                              reservation['name'].toString(),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text('Salle ' + reservation['salle'].toString()),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(reservation['date'].toString())
+                          ],
+                        ))
+                ),*/
             ]),
           )),
     );
@@ -97,8 +106,8 @@ class _RechercheState extends State<Recherche> {
 
 // BARRE DE RECHERCHE DES RESERVATIONS AVEC CRITETES DE SELECTION
 class BarreRecherche extends StatefulWidget {
-  final String saisie;
-  const BarreRecherche({Key? key, required this.saisie}) : super(key: key);
+  String saisie;
+  BarreRecherche({Key? key, required this.saisie}) : super(key: key);
 
   @override
   State<BarreRecherche> createState() => _BarreRechercheState();
@@ -117,13 +126,34 @@ class _BarreRechercheState extends State<BarreRecherche> {
   // Déinition et initialisation de la valeur par défaut des choix
   int domaine = 1;
   String periodicite = 'Jour';
-  String nomSalle = 'Salle 1';
+  int nomSalle = 5;
   String type = 'Amphithéâtre';
   String nomDomaine = 'Plongée sous-marine';
 
   // Variables et initialisation des champs de saisie
   var saisie = TextEditingController();
   String? dateTrie;
+
+  var listeReservation = [
+    {'name': 'Réunion', 'date': '12/11/2021', 'salle': 1, 'domaine': 2},
+    {'name': 'Conférence', 'date': '17/10/2021', 'salle': 2, 'domaine': 1},
+    {'name': 'Cours', 'date': '10/07/2021', 'salle': 3, 'domaine': 1},
+    {'name': 'Festivités', 'date': '12/11/2021', 'salle': 2, 'domaine': 3},
+    {
+      'name': 'Cours de travail',
+      'date': '12/11/2021',
+      'salle': 1,
+      'domaine': 2
+    },
+    {'name': 'Séminaire', 'date': '01/04/2021', 'salle': 2, 'domaine': 3},
+    {'name': 'Stage', 'date': '28/09/2021', 'salle': 2, 'domaine': 3},
+    {'name': 'Palabre', 'date': '31/12/2021', 'salle': 2, 'domaine': 3},
+  ];
+
+  @override
+  void didUpdateWidget(BarreRecherche barreDeRecherche) {
+    super.didUpdateWidget(barreDeRecherche);
+  }
 
   // Initialisation des saisies du formulaire
   @override
@@ -145,6 +175,7 @@ class _BarreRechercheState extends State<BarreRecherche> {
       key: _formKey,
       child: Column(
         children: [
+          // Barre de recherche
           Row(
             children: [
               // Conteneur de la barre de recherche
@@ -152,12 +183,12 @@ class _BarreRechercheState extends State<BarreRecherche> {
                 child: Container(
                     height: 45,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: const Color.fromARGB(108, 219, 218, 218),
-                    ),
+                        borderRadius: BorderRadius.circular(5),
+                        // color: const Color.fromARGB(108, 219, 218, 218),
+                        color: Colors.amber.shade300),
                     child: Center(
                         child: TextField(
-                      style: const TextStyle(fontSize: 13, letterSpacing: 2),
+                      style: const TextStyle(fontSize: 15, letterSpacing: 1),
                       controller: saisie,
                       textAlign: TextAlign.center,
                       decoration: const InputDecoration(
@@ -172,10 +203,16 @@ class _BarreRechercheState extends State<BarreRecherche> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: const Color.fromARGB(108, 219, 218, 218),
+                  // color: const Color.fromARGB(150, 219, 218, 218),
+                  color: Colors.amber.shade300,
                 ),
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      // Mise à jour des résultats de recherche
+                      widget.saisie = saisie.text;
+                    });
+                  },
                   icon: const Icon(
                     Icons.search,
                     // color: couleurBleu,
@@ -221,90 +258,44 @@ class _BarreRechercheState extends State<BarreRecherche> {
                 const SizedBox(
                   height: 15,
                 ),
-                // Type de réservation
-                Row(
-                  children: [
-                    Container(
-                      width: 100,
-                      child: const Text(
-                        'Type',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: couleurPale,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        value: type,
-                        isExpanded: true,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            // Modification dynamique
-                            switch (newValue) {
-                              case 'Amphithéâtre':
-                                domaine = 2;
-                                nomDomaine = newValue!;
-                                break;
-                              case 'Réunion':
-                                domaine = 3;
-                                nomDomaine = newValue!;
-                                break;
-                              default:
-                                domaine = 1;
-                                nomDomaine = newValue!;
-                            }
-                          });
-                        },
-                        items: <String>[
-                          'Amphithéâtre',
-                          'Convivialité',
-                          'Salle de réunion'
-                        ].map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value,
-                                style: const TextStyle(
-                                    fontSize: 13, color: couleurPale)),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
                 // Sélection du domaine
                 Row(
                   children: [
                     Container(
                       width: 100,
                       child: const Text(
-                        'Domaine',
+                        'Domaine : ',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: couleurPale,
+                          fontSize: 17,
+                          color: couleurBleu,
                         ),
                       ),
+                    ),
+                    const SizedBox(
+                      width: 15,
                     ),
                     Expanded(
                       child: DropdownButton<String>(
                         value: nomDomaine,
-                        isExpanded: true,
                         icon: const Icon(Icons.arrow_drop_down),
+                        isExpanded: true,
                         onChanged: (String? newValue) {
                           setState(() {
                             // Modification dynamique
                             switch (newValue) {
                               case 'Pétanque':
                                 domaine = 2;
+                                nomSalle = 1;
                                 nomDomaine = newValue!;
                                 break;
                               case 'Tennis':
                                 domaine = 3;
+                                nomSalle = 6;
                                 nomDomaine = newValue!;
                                 break;
                               default:
                                 domaine = 1;
+                                nomSalle = 5;
                                 nomDomaine = newValue!;
                             }
                           });
@@ -316,9 +307,7 @@ class _BarreRechercheState extends State<BarreRecherche> {
                         ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value,
-                                style: const TextStyle(
-                                    fontSize: 13, color: couleurPale)),
+                            child: Text(value),
                           );
                         }).toList(),
                       ),
@@ -327,116 +316,131 @@ class _BarreRechercheState extends State<BarreRecherche> {
                 ),
                 // Sélection de la salle
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       width: 100,
                       child: const Text(
-                        'Salle',
+                        'Salle : ',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: couleurPale,
+                          fontSize: 17,
+                          color: couleurBleu,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        value: nomSalle,
-                        isExpanded: true,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            // Modification dynamique
-                            switch (newValue) {
-                              case 'Salle 2':
-                                domaine = 2;
-                                nomSalle = newValue!;
-                                break;
-                              case 'Salle 3':
-                                domaine = 3;
-                                nomSalle = newValue!;
-                                break;
-                              default:
-                                domaine = 1;
-                                nomSalle = newValue!;
-                            }
-                          });
-                        },
-                        items: <String>['Salle 1', 'Salle 2', 'Salle 3']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                  fontSize: 13, color: couleurPale),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                    const SizedBox(
+                      width: 15,
                     ),
+                    Expanded(
+                      child: GetSalles(
+                        indomaine: domaine,
+                        initSalle: nomSalle,
+                      ),
+                    )
                   ],
                 ),
               ],
             ),
-          )
-          /*/ Périodicité de la réservation
-          Row(
-            children: [
-              Container(
-                width: 100,
-                child: const Text(
-                  'Périodicité : ',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: couleurBleu,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: periodicite,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      // Modification dynamique
-                      switch (newValue) {
-                        case 'Jour':
-                          domaine = 2;
-                          nomDomaine = newValue!;
-                          break;
-                        case 'Semaine':
-                          domaine = 3;
-                          nomDomaine = newValue!;
-                          break;
-                        default:
-                          domaine = 1;
-                          nomDomaine = newValue!;
-                      }
-                    });
-                  },
-                  items: <String>[
-                    'Jour',
-                    'Semaine',
-                    'Mois',
-                    'Année',
-                    'Année',
-                    'Jour de semaine',
-                    'Jour du mois'
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),*/
+          ),
+          // Liste des réservations correspondant à la recherche
+          for (var reservation in listeReservation.where((reservation) =>
+              reservation['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(saisie.text.toLowerCase())))
+            DelayedAnimation(
+                delay: 1500,
+                child: Container(
+                    width: double.infinity,
+                    height: 100,
+                    decoration: BoxDecoration(
+                        color: couleurJaune,
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
+                    child: Column(
+                      children: [
+                        // Titre de la réservation
+                        Text(
+                          reservation['name'].toString(),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        // Salle affiliée à la réservation
+                        Text('Salle ' + reservation['salle'].toString()),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        // Date de début de la réservation
+                        Text(reservation['date'].toString())
+                      ],
+                    ))),
         ],
       ),
     );
+  }
+}
+
+// CLASS DE RECUPERATION DES SALLES
+class GetSalles extends StatefulWidget {
+  final int indomaine;
+  int initSalle;
+  GetSalles({Key? key, required this.indomaine, required this.initSalle});
+
+  @override
+  State<GetSalles> createState() => _GetSallesState();
+}
+
+// Formattage des salles récupérées
+class _GetSallesState extends State<GetSalles> {
+  // Variables de récupération des salles du domaine 1
+  late Iterable<dynamic> reservationsDomaine;
+
+  @override
+  void didUpdateWidget(GetSalles planning) {
+    super.didUpdateWidget(planning);
+  }
+
+  // Récupération des données du planning
+  Future<dynamic> getPlanningData() async {
+    return await api.getPlanningData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<dynamic>(
+        future: getPlanningData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // Récupération des salles du domaine sélectionné
+            reservationsDomaine = snapshot.data!['salles']
+                .where((salle) => salle['area_id'] == widget.indomaine);
+            // Formatage des réservations de chaque salle du domaine sélectionné
+            return DropdownButton<int>(
+              value: widget.initSalle,
+              icon: const Icon(Icons.arrow_drop_down),
+              isExpanded: true,
+              onChanged: (int? newValue) {
+                setState(() {
+                  // Mise à jour de l'identifiant
+                  widget.initSalle = newValue!;
+                });
+              },
+              items: reservationsDomaine
+                  .map<DropdownMenuItem<int>>((dynamic value) {
+                return DropdownMenuItem<int>(
+                  value: value['id'],
+                  child: Text(value['room_name'].toString()),
+                );
+              }).toList(),
+            );
+          } else {
+            return const Center(child: Text('Pas de données'));
+          }
+        });
   }
 }

@@ -5,15 +5,27 @@ import 'package:http/http.dart' as http;
 // Class de gestion des utilisateurs
 class User {
   // Création des attributs locaux de l'utilisateur
-  final int? id;
-  final String? statut;
-  final String? email;
-  final int? niveauTarif;
+  final int id;
+  final String statut;
+  final String email;
+  final int niveauTarif;
   final int droitReservation;
 
   // Constructeur
   User(this.id, this.statut, this.email, this.niveauTarif,
       this.droitReservation);
+
+  // Récupération du tarif de l'utilisateur
+  int getTarif() {
+    // Tarif
+    return niveauTarif;
+  }
+
+  // Récupération de l'identifiant de l'utilisateur
+  int getId() {
+    // Tarif
+    return id;
+  }
 
   // Fonction de récupération test
   Future<dynamic> getDataUser() async {

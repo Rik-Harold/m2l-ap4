@@ -39,6 +39,7 @@ class _MesReservationsState extends State<MesReservations> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: couleurOrangePale,
       drawer: NavBar(
         userConnect: widget.dataUser,
       ),
@@ -54,31 +55,46 @@ class _MesReservationsState extends State<MesReservations> {
           child: Container(
         child: Column(children: [
           const SizedBox(
-            height: 40,
+            height: 30,
           ),
-          DelayedAnimation(
-              delay: 1000,
-              child: Text(
-                widget.dataUser!.email,
-                textAlign: TextAlign.center,
-              )),
-          const SizedBox(
-            height: 50,
-          ),
+          // DelayedAnimation(
+          //     delay: 1000,
+          //     child: Text(
+          //       widget.dataUser!.email,
+          //       textAlign: TextAlign.center,
+          //     )),
+          // const SizedBox(
+          //   height: 50,
+          // ),
           for (var reservation in listeReservation)
             DelayedAnimation(
                 delay: 1500,
                 child: Container(
-                  width: double.infinity,
-                  height: 100,
-                  decoration: BoxDecoration(
-                      color: couleurJaune,
-                      borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(10),
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Text(reservation['name'].toString()),
-                )),
+                    width: double.infinity,
+                    height: 100,
+                    decoration: BoxDecoration(
+                        color: couleurJaune,
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
+                    child: Column(
+                      children: [
+                        Text(
+                          reservation['name'].toString(),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text('Salle ' + reservation['salle'].toString()),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(reservation['date'].toString())
+                      ],
+                    ))),
           const SizedBox(
             height: 10,
           ),

@@ -16,6 +16,7 @@ class Connexion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: couleurOrangePale,
         appBar: AppBar(
           title: const Text('Se connecter'),
           backgroundColor: couleurJaune,
@@ -185,7 +186,6 @@ class _FormConnexionState extends State<FormConnexion> {
                                 statutConnexion: 'connecte',
                                 userConnect: reponse['utilisateur'],
                               )));
-                } else if (reponse['statut'] == 'invalide') {
                 } else {
                   // Redirection vers la page d'inscription pour les non inscrits
                   Navigator.push(

@@ -7,6 +7,7 @@ import 'package:m2l/navBar.dart';
 import 'package:m2l/recherche.dart';
 import 'package:m2l/reservations/form.dart';
 import 'package:m2l/reservations/view.dart';
+import 'package:m2l/reservations/select.dart';
 
 // Initilisation de l'appel à l'api
 RequeteApi api = RequeteApi();
@@ -30,10 +31,24 @@ class _AccueilState extends State<Accueil> {
   AlertDialog? test;
   String nomDomaine = 'Plongée sous-marine';
   int domaine = 1;
+  String currentDate = DateTime.now().toString().substring(0, 10);
+  bool lastDay = false;
+  bool nextDay = false;
 
   @override
   Widget build(BuildContext context) {
+    // Réinitialisation des boutons
+    if (lastDay || nextDay) {
+      lastDay = nextDay = false;
+    }
+
+    // Formatage de la date actuelle
+    int newYear = int.parse(currentDate.substring(0, 4));
+    int newMonth = int.parse(currentDate.substring(5, 7));
+    int newDay = int.parse(currentDate.substring(8, 10));
+
     return Scaffold(
+        backgroundColor: couleurOrangePale,
         drawer: widget.statutConnexion == 'connecte'
             ? NavBar(
                 userConnect: widget.userConnect,
@@ -47,7 +62,7 @@ class _AccueilState extends State<Accueil> {
             centerTitle: true,
             title: Text(
               widget.statutConnexion == 'non connecte'
-                  ? 'M2L'
+                  ? 'Maison des Ligues de Lorraine'
                   : widget.userConnect!.email,
               style: TextStyle(
                   color: widget.statutConnexion == 'connecte'
@@ -75,7 +90,6 @@ class _AccueilState extends State<Accueil> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const Connexion()));
-                    // return const NavBar();
                   }
                 },
                 // Style de l'icône du bouton à cliquer suivant le statut de connexion du visiteur
@@ -94,63 +108,6 @@ class _AccueilState extends State<Accueil> {
             const SizedBox(
               height: 10,
             ),
-            /*/ ENTETE DE LA PAGE D'ACCUEIL
-            DelayedAnimation(
-                delay: 1000,
-                child: Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  decoration: const BoxDecoration(
-                      color: couleurJaune,
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  child: Row(
-                    children: [
-                      // Conteneur du logo de la M2L
-                      Container(
-                          height: 80,
-                          child: Image.asset('assets/images/logo_rond.png')),
-                      // Positionnement du text du statut de connexion du visiteur
-                      Expanded(
-                          child: Center(
-                              child: Text(
-                        widget.statutConnexion == 'non connecte'
-                            ? 'M2L'
-                            : widget.userConnect!.email,
-                        style: const TextStyle(
-                            color: couleurRouge,
-                            fontSize: 18,
-                            fontFamily: 'fantasy',
-                            fontWeight: FontWeight.bold),
-                      ))),
-                      // Bouton de connexion et d'affichage de la gestion des salles de réservation
-                      IconButton(
-                        onPressed: () {
-                          // Vérification du statut de connexion de visiteur
-                          if (widget.statutConnexion == 'connecte') {
-                            // Redirection vers l'interface de gestion des réservations de salles pour les visiteurs authentifiés
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MesReservations(
-                                        dataUser: widget.userConnect)));
-                          } else {
-                            // Redirection vers le formulaire de connexion pour les visiteurs non authentifiés
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Connexion()));
-                            // return const NavBar();
-                          }
-                        },
-                        // Style de l'icône du bouton à cliquer suivant le statut de connexion du visiteur
-                        icon: widget.statutConnexion == 'non connecte'
-                            ? const Icon(Icons.login)
-                            : const Icon(Icons.room_preferences_outlined),
-                        color: couleurRouge,
-                        iconSize: 45,
-                      )
-                    ],
-                  ),
-                )), */
             // BARRE DE RECHERCHE
             DelayedAnimation(
               delay: 1500,
@@ -170,26 +127,44 @@ class _AccueilState extends State<Accueil> {
                 // Colonne des lignes du planning
                 child: Column(
                   children: [
-                    // Ligne des Horaires et du nom des salles
+                    // Ligne de défilement du planning en jours
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Bouton d'affichage du planing sur le jour précédent
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                // Modification de la date courante du planning
+                                currentDate =
+                                    DateTime(newYear, newMonth, newDay)
+                                        .subtract(const Duration(days: 1))
+                                        .toString()
+                                        .substring(0, 10);
+                              });
+                            },
                             icon: const Icon(Icons.navigate_before)),
                         // Affichage du jour courant du planning
-                        const Text(
-                          'JOUR',
+                        Text(
+                          'JOUR (' + currentDate + ')',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: couleurBleu,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 3),
                         ),
                         // Bouton d'affichage du planing sur le jour précédent
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                // Modification de la date courante du planning
+                                currentDate =
+                                    DateTime(newYear, newMonth, newDay)
+                                        .add(const Duration(days: 1))
+                                        .toString()
+                                        .substring(0, 10);
+                              });
+                            },
                             icon: const Icon(Icons.navigate_next))
                       ],
                     ),
@@ -200,9 +175,10 @@ class _AccueilState extends State<Accueil> {
                     Container(
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                          color: const Color.fromARGB(108, 219, 218, 218),
+                          // color: const Color.fromARGB(108, 219, 218, 218),
+                          color: couleurJaune,
                           borderRadius:
-                              const BorderRadius.all(Radius.circular(15)),
+                              const BorderRadius.all(Radius.circular(10)),
                           border: Border.all(
                               color: const Color.fromARGB(255, 219, 219, 219),
                               width: .3,
@@ -211,7 +187,7 @@ class _AccueilState extends State<Accueil> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(8),
                             // Colonne des différentes heures de la journée
                             child: Column(children: [
                               // Titre de la colonne Horaire
@@ -236,7 +212,13 @@ class _AccueilState extends State<Accueil> {
                                 )
                             ]),
                           ),
-                          Expanded(child: Planning(indomaine: domaine))
+                          Expanded(
+                              child: Planning(
+                            statut: widget.statutConnexion,
+                            userData: widget.userConnect,
+                            indomaine: domaine,
+                            currentDate: currentDate,
+                          ))
                         ],
                       ),
                     ),
@@ -321,6 +303,7 @@ class _AccueilState extends State<Accueil> {
                 delay: 3500,
                 child: Reserver(
                   statut: widget.statutConnexion,
+                  dataConnect: widget.userConnect,
                 )),
           ]),
         )));
@@ -489,8 +472,16 @@ class _BarreRechercheState extends State<BarreRecherche> {
 
 // CLASS DE RECUPERATION DU PLANNING
 class Planning extends StatefulWidget {
+  final String statut;
+  final dynamic userData;
   final int indomaine;
-  Planning({Key? key, required this.indomaine});
+  final String currentDate;
+  Planning(
+      {Key? key,
+      required this.statut,
+      required this.userData,
+      required this.indomaine,
+      required this.currentDate});
 
   @override
   State<Planning> createState() => _PlanningState();
@@ -501,6 +492,7 @@ class _PlanningState extends State<Planning> {
   // Variables de récupération des salles du domaine 1
   late List<dynamic> reservationsDomaine;
 
+  // Mise à jour du composant planning
   @override
   void didUpdateWidget(Planning planning) {
     super.didUpdateWidget(planning);
@@ -526,11 +518,16 @@ class _PlanningState extends State<Planning> {
                   children: [
                     for (var salle in reservationsDomaine
                         .where((salle) => salle['area_id'] == widget.indomaine))
-                      Reservation(salle['room_name'])
+                      Reservation(widget.statut, widget.userData,
+                          salle['room_name'], widget.currentDate)
                   ],
                 ));
           } else {
-            return const Center(child: Text('Pas de données'));
+            return const Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(
+                  child: Text('Pas de données'),
+                ));
           }
         });
   }
@@ -539,16 +536,72 @@ class _PlanningState extends State<Planning> {
 // FORMATAGE DES RESERVATION D'UNE SALLE DU DOMAINE SELECTIONNE
 class Reservation extends StatelessWidget {
   // Variables locales de la salle
+  final String statut;
+  final dynamic userData;
   final String nameSalle;
+  final String dateReservation;
   // final List<Map<String, dynamic>> reservations;
   static const reservations = [
-    {'name': 'Réunion', 'duree': 3, 'capacite': 50},
-    // {'name': 'Stage', 'duree': 2, 'capacite': 25},
-    {'name': 'Séminaire', 'duree': 2, 'capacite': 30},
-    {'name': 'Stage', 'duree': 3, 'capacite': 18}
+    {
+      'id': 1,
+      'name': 'Réunion',
+      'duree': 3,
+      'capacite': 50,
+      'createur': 'Dupont Jean',
+      'date': '2022-06-13'
+    },
+    {
+      'id': 2,
+      'name': 'Séminaire',
+      'duree': 2,
+      'capacite': 30,
+      'createur': 'Dupont Marc',
+      'date': '2022-06-13'
+    },
+    {
+      'id': 3,
+      'name': 'Stage',
+      'duree': 3,
+      'capacite': 18,
+      'createur': 'Mr Pierre',
+      'date': '2022-06-13'
+    },
+    {
+      'id': 4,
+      'name': 'Séminaire',
+      'duree': 2,
+      'capacite': 30,
+      'createur': 'Dupont Marc',
+      'date': '2022-06-14'
+    },
+    {
+      'id': 5,
+      'name': 'Stage',
+      'duree': 3,
+      'capacite': 18,
+      'createur': 'Mr Pierre',
+      'date': '2022-06-14'
+    },
+    {
+      'id': 6,
+      'name': 'Cours de réseau',
+      'duree': 3,
+      'capacite': 30,
+      'createur': 'Mr Rodrigue',
+      'date': '2022-06-12'
+    },
+    {
+      'id': 7,
+      'name': 'Réunion professionnelle',
+      'duree': 4,
+      'capacite': 18,
+      'createur': 'Mr Jean',
+      'date': '2022-06-12'
+    }
   ];
 
-  const Reservation(this.nameSalle);
+  const Reservation(
+      this.statut, this.userData, this.nameSalle, this.dateReservation);
 
   @override
   Widget build(BuildContext context) {
@@ -556,7 +609,7 @@ class Reservation extends StatelessWidget {
       children: [
         Center(
           child: Padding(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(8),
             child: Text(nameSalle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -565,17 +618,34 @@ class Reservation extends StatelessWidget {
                 )),
           ),
         ),
-        for (var reservation in reservations)
+        for (var reservation in reservations
+            .where((aReservation) => aReservation['date'] == dateReservation))
           Container(
             margin: const EdgeInsets.only(top: 3, right: 3),
             width: 150,
             height: (38 * double.parse(reservation['duree'].toString())),
-            color: const Color.fromARGB(192, 219, 218, 218),
+            decoration: BoxDecoration(
+                color: Colors.amber.shade300,
+                borderRadius: BorderRadius.circular(5)),
             child: Center(
+              child: TextButton(
                 child: Text(
-              reservation['name'].toString(),
-              style: const TextStyle(fontWeight: FontWeight.w400),
-            )),
+                  reservation['name'].toString(),
+                  style: const TextStyle(fontWeight: FontWeight.w400),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SelectReservation(
+                                statutUser: statut,
+                                dataUser: userData,
+                                idReservation:
+                                    int.parse(reservation['id'].toString()),
+                              )));
+                },
+              ),
+            ),
           )
       ],
     );
@@ -585,7 +655,9 @@ class Reservation extends StatelessWidget {
 // BOUTON DE RESERVATION DE SALLE OU D'AFFICHAGE D'UNE NOTIFICATION D'ALERTE
 class Reserver extends StatefulWidget {
   final String statut;
-  const Reserver({Key? key, required this.statut}) : super(key: key);
+  final dynamic dataConnect;
+  const Reserver({Key? key, required this.statut, required this.dataConnect})
+      : super(key: key);
 
   @override
   State<Reserver> createState() => _ReserverState();
@@ -631,8 +703,12 @@ class _ReserverState extends State<Reserver> {
         // Vérification du statut de l'utilisation pour une redirection
         if (widget.statut == 'connecte') {
           // Redirection vers le formulaire de réservation de salles
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const Reservations()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Reservations(
+                        userData: widget.dataConnect,
+                      )));
         } else {
           // Affichage de l'alerte en cas d'utilisateur non connecté
           showAlert(context);
