@@ -3,7 +3,6 @@ import 'package:m2l/animations/affichage_anime.dart';
 import 'package:m2l/class/RequeteApi.dart';
 import 'package:m2l/main.dart';
 import 'package:m2l/navBar.dart';
-import 'package:date_time_picker/date_time_picker.dart';
 
 // Initilisation de l'appel à l'api
 RequeteApi api = RequeteApi();
@@ -63,41 +62,6 @@ class _RechercheState extends State<Recherche> {
               const SizedBox(
                 height: 20,
               ),
-              /*/ Liste des réservations correspondant à la recherche
-              for (var reservation in listeReservation.where((reservation) =>
-                  reservation['name']
-                      .toString()
-                      .toLowerCase()
-                      .contains(newSaisie.toLowerCase())))
-                DelayedAnimation(
-                    delay: 1500,
-                    child: Container(
-                        width: double.infinity,
-                        height: 100,
-                        decoration: BoxDecoration(
-                            color: couleurJaune,
-                            borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 20),
-                        child: Column(
-                          children: [
-                            Text(
-                              reservation['name'].toString(),
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text('Salle ' + reservation['salle'].toString()),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Text(reservation['date'].toString())
-                          ],
-                        ))
-                ),*/
             ]),
           )),
     );
@@ -117,12 +81,6 @@ class _BarreRechercheState extends State<BarreRecherche> {
   // Clé du formulaire
   final _formKey = GlobalKey<FormState>();
 
-  // Requête d'authentification
-  // Future<String> Reservations(email, mdp) async {
-  //   // Reservations à l'API
-  //   return await api.Reservations(email, mdp);
-  // }
-
   // Déinition et initialisation de la valeur par défaut des choix
   int domaine = 1;
   String periodicite = 'Jour';
@@ -134,21 +92,13 @@ class _BarreRechercheState extends State<BarreRecherche> {
   var saisie = TextEditingController();
   String? dateTrie;
 
-  var listeReservation = [
-    {'name': 'Réunion', 'date': '12/11/2021', 'salle': 1, 'domaine': 2},
-    {'name': 'Conférence', 'date': '17/10/2021', 'salle': 2, 'domaine': 1},
-    {'name': 'Cours', 'date': '10/07/2021', 'salle': 3, 'domaine': 1},
-    {'name': 'Festivités', 'date': '12/11/2021', 'salle': 2, 'domaine': 3},
-    {
-      'name': 'Cours de travail',
-      'date': '12/11/2021',
-      'salle': 1,
-      'domaine': 2
-    },
-    {'name': 'Séminaire', 'date': '01/04/2021', 'salle': 2, 'domaine': 3},
-    {'name': 'Stage', 'date': '28/09/2021', 'salle': 2, 'domaine': 3},
-    {'name': 'Palabre', 'date': '31/12/2021', 'salle': 2, 'domaine': 3},
-  ];
+  // Variable de récupération des réservations de l'utilisateur
+  late List<dynamic> reservations;
+
+  // Récupération des données des réservations
+  Future<dynamic> getReservation() async {
+    return await api.getReservations();
+  }
 
   @override
   void didUpdateWidget(BarreRecherche barreDeRecherche) {
@@ -224,7 +174,7 @@ class _BarreRechercheState extends State<BarreRecherche> {
             ],
           ),
           // Critères de tri de réservation
-          Container(
+          /*Container(
             padding: const EdgeInsets.all(25),
             margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
             child: Column(
@@ -341,44 +291,68 @@ class _BarreRechercheState extends State<BarreRecherche> {
                 ),
               ],
             ),
+          ),*/
+          const SizedBox(
+            height: 20,
           ),
           // Liste des réservations correspondant à la recherche
-          for (var reservation in listeReservation.where((reservation) =>
-              reservation['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(saisie.text.toLowerCase())))
-            DelayedAnimation(
-                delay: 1500,
-                child: Container(
-                    width: double.infinity,
-                    height: 100,
-                    decoration: BoxDecoration(
-                        color: couleurJaune,
-                        borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 20),
-                    child: Column(
-                      children: [
-                        // Titre de la réservation
-                        Text(
-                          reservation['name'].toString(),
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        // Salle affiliée à la réservation
-                        Text('Salle ' + reservation['salle'].toString()),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        // Date de début de la réservation
-                        Text(reservation['date'].toString())
-                      ],
-                    ))),
+          FutureBuilder<dynamic>(
+              future: getReservation(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  // Récupération des salles du domaine sélectionné
+                  reservations = snapshot.data!;
+                  // Formatage des réservations recherchées
+                  return Column(
+                    children: [
+                      for (var reservation in reservations.where(
+                          (reservation) => reservation['breve_description']
+                              .toString()
+                              .toLowerCase()
+                              .contains(saisie.text.toLowerCase())))
+                        DelayedAnimation(
+                            delay: 1500,
+                            child: Container(
+                                width: double.infinity,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                    color: couleurJaune,
+                                    borderRadius: BorderRadius.circular(10)),
+                                padding: const EdgeInsets.all(10),
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 20),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      reservation['breve_description']
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text('Du : ' +
+                                        reservation['date_heure_debut']
+                                            .toString()),
+                                    Text('au : ' +
+                                        reservation['date_heure_fin']
+                                            .toString())
+                                  ],
+                                ))),
+                    ],
+                  );
+                } else {
+                  // Notification en cas d'absence de réservations
+                  return const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Center(
+                        child: Text('Aucune réservation disponible !',
+                            style: TextStyle(fontSize: 17)),
+                      ));
+                }
+              })
         ],
       ),
     );

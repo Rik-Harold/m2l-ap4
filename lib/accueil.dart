@@ -29,7 +29,7 @@ class _AccueilState extends State<Accueil> {
   // Variable de stockage de la donnée
   late Future<dynamic> dataUser;
   AlertDialog? test;
-  String nomDomaine = 'Plongée sous-marine';
+  String nomDomaine = 'Informatique - multimédia';
   int domaine = 1;
   String currentDate = DateTime.now().toString().substring(0, 10);
   bool lastDay = false;
@@ -257,11 +257,11 @@ class _AccueilState extends State<Accueil> {
                                     setState(() {
                                       // Sélection et stockage du domaine
                                       switch (newValue) {
-                                        case 'Pétanque':
+                                        case 'Salles de réunion':
                                           domaine = 2;
                                           nomDomaine = newValue!;
                                           break;
-                                        case 'Tennis':
+                                        case 'Salles de réception':
                                           domaine = 3;
                                           nomDomaine = newValue!;
                                           break;
@@ -273,9 +273,9 @@ class _AccueilState extends State<Accueil> {
                                   },
                                   // Liste des dommaines à afficher
                                   items: <String>[
-                                    'Plongée sous-marine',
-                                    'Pétanque',
-                                    'Tennis'
+                                    'Informatique - multimédia',
+                                    'Salles de réunion',
+                                    'Salles de réception'
                                   ].map<DropdownMenuItem<String>>(
                                       (String value) {
                                     return DropdownMenuItem<String>(
@@ -309,86 +309,6 @@ class _AccueilState extends State<Accueil> {
         )));
   }
 }
-
-/*/ BARRE DE RECHERCHE DE RESERVATIONS
-class BarreRecherche extends StatelessWidget {
-  final String statut;
-  final dynamic dataUser;
-  BarreRecherche(
-      {Key? key, required this.statut, this.dataUser})
-      : super(key: key);
-
-  // Variables et initialisation des champs de saisie
-  var saisie = TextEditingController();
-
-  // Initialisation des saisies du formulaire
-  @override
-  void dispose() {
-    // Initialisation de chaque champ
-    saisie.dispose();
-
-    // Affectation de la valeur recherchée
-    // saisie = widget.saisie;
-    saisie.text = widget.saisie;
-
-    // Lancement de l'inialisation des champs
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Conteneur de la barre de recherche
-        Expanded(
-          child: Container(
-              height: 45,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: const Color.fromARGB(108, 219, 218, 218),
-              ),
-              child: Center(
-                  child: TextField(
-                controller: saisie,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                    hintText: 'Rechercher une réservation',
-                    border: InputBorder.none),
-              ))),
-        ),
-        const SizedBox(
-          width: 5,
-        ),
-        // Bouton de lancement de la recherche
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: const Color.fromARGB(108, 219, 218, 218),
-          ),
-          child: IconButton(
-            onPressed: () {
-              // Redirection vers le formulaire de réservation de salles
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Recherche(
-                            statutConnexion: statut,
-                            userConnect: dataUser,
-                            saisie: saisie.toString(),
-                          )));
-            },
-            icon: const Icon(
-              Icons.search,
-              // color: couleurBleu,
-              color: Color.fromARGB(121, 39, 38, 38),
-            ),
-            iconSize: 30,
-          ),
-        ),
-      ],
-    );
-  }
-}*/
 
 class BarreRecherche extends StatefulWidget {
   final String statut;
@@ -518,8 +438,15 @@ class _PlanningState extends State<Planning> {
                   children: [
                     for (var salle in reservationsDomaine
                         .where((salle) => salle['area_id'] == widget.indomaine))
-                      Reservation(widget.statut, widget.userData,
-                          salle['room_name'], widget.currentDate)
+                      Reservation(
+                          widget.statut,
+                          widget.userData,
+                          salle['room_name'],
+                          salle['id'],
+                          widget.currentDate,
+                          snapshot.data!['reservations'],
+                          snapshot.data!['domaines'],
+                          snapshot.data!['salles'])
                   ],
                 ));
           } else {
@@ -539,69 +466,27 @@ class Reservation extends StatelessWidget {
   final String statut;
   final dynamic userData;
   final String nameSalle;
+  final int idSalle;
   final String dateReservation;
-  // final List<Map<String, dynamic>> reservations;
-  static const reservations = [
-    {
-      'id': 1,
-      'name': 'Réunion',
-      'duree': 3,
-      'capacite': 50,
-      'createur': 'Dupont Jean',
-      'date': '2022-06-13'
-    },
-    {
-      'id': 2,
-      'name': 'Séminaire',
-      'duree': 2,
-      'capacite': 30,
-      'createur': 'Dupont Marc',
-      'date': '2022-06-13'
-    },
-    {
-      'id': 3,
-      'name': 'Stage',
-      'duree': 3,
-      'capacite': 18,
-      'createur': 'Mr Pierre',
-      'date': '2022-06-13'
-    },
-    {
-      'id': 4,
-      'name': 'Séminaire',
-      'duree': 2,
-      'capacite': 30,
-      'createur': 'Dupont Marc',
-      'date': '2022-06-14'
-    },
-    {
-      'id': 5,
-      'name': 'Stage',
-      'duree': 3,
-      'capacite': 18,
-      'createur': 'Mr Pierre',
-      'date': '2022-06-14'
-    },
-    {
-      'id': 6,
-      'name': 'Cours de réseau',
-      'duree': 3,
-      'capacite': 30,
-      'createur': 'Mr Rodrigue',
-      'date': '2022-06-12'
-    },
-    {
-      'id': 7,
-      'name': 'Réunion professionnelle',
-      'duree': 4,
-      'capacite': 18,
-      'createur': 'Mr Jean',
-      'date': '2022-06-12'
-    }
-  ];
+  final List<dynamic> listeReservations;
+  final List<dynamic> listeDomaines;
+  final List<dynamic> listeSalles;
+  // Fonction de récupération de la durée à partir des heures de début et de fin
+  double getDuree(dateDebut, dateFin) {
+    double heureDebut = double.parse(dateFin.substring(11, 13)) -
+        double.parse(dateDebut.substring(11, 13));
+    return heureDebut;
+  }
 
   const Reservation(
-      this.statut, this.userData, this.nameSalle, this.dateReservation);
+      this.statut,
+      this.userData,
+      this.nameSalle,
+      this.idSalle,
+      this.dateReservation,
+      this.listeReservations,
+      this.listeDomaines,
+      this.listeSalles);
 
   @override
   Widget build(BuildContext context) {
@@ -618,35 +503,91 @@ class Reservation extends StatelessWidget {
                 )),
           ),
         ),
-        for (var reservation in reservations
-            .where((aReservation) => aReservation['date'] == dateReservation))
-          Container(
-            margin: const EdgeInsets.only(top: 3, right: 3),
-            width: 150,
-            height: (38 * double.parse(reservation['duree'].toString())),
-            decoration: BoxDecoration(
-                color: Colors.amber.shade300,
-                borderRadius: BorderRadius.circular(5)),
-            child: Center(
-              child: TextButton(
-                child: Text(
-                  reservation['name'].toString(),
-                  style: const TextStyle(fontWeight: FontWeight.w400),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SelectReservation(
-                                statutUser: statut,
-                                dataUser: userData,
-                                idReservation:
-                                    int.parse(reservation['id'].toString()),
-                              )));
-                },
-              ),
-            ),
-          )
+        for (var reservation in listeReservations.where((aReservation) =>
+            aReservation['date_heure_debut'].toString().substring(0, 10) ==
+            dateReservation))
+          reservation['id_salle'] == idSalle
+              ? Column(children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 3, right: 3),
+                    width: 150,
+                    height: (38 *
+                        getDuree(reservation['date_heure_debut'],
+                            reservation['date_heure_fin'])),
+                    decoration: BoxDecoration(
+                        color: Colors.amber.shade300,
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: TextButton(
+                        child: Text(
+                          reservation['breve_description'].toString(),
+                          style: const TextStyle(fontWeight: FontWeight.w400),
+                        ),
+                        onPressed: () {
+                          // Récupération de la salle et du domaine de la réservation
+                          String domaine = '';
+                          String salle = '';
+                          dynamic leDomaine = listeDomaines.firstWhere(
+                              (unDomaine) =>
+                                  unDomaine['id'] == reservation['id_domaine']);
+                          dynamic laSalle = listeSalles.firstWhere((uneSalle) =>
+                              uneSalle['id'] == reservation['id_salle']);
+                          domaine = leDomaine['area_name'];
+                          salle = laSalle['room_name'];
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SelectReservation(
+                                        statutUser: statut,
+                                        dataUser: userData,
+                                        reservation: reservation,
+                                        nameDomaine: domaine,
+                                        nameSalle: salle,
+                                      )));
+                        },
+                      ),
+                    ),
+                  ),
+                  // Plage horaire libre partielle
+                  Container(
+                    margin: const EdgeInsets.only(top: 3, right: 3),
+                    width: 150,
+                    height: (38 *
+                        (10 -
+                            getDuree(reservation['date_heure_debut'],
+                                reservation['date_heure_fin']))),
+                    decoration: BoxDecoration(
+                        color: Colors.amber.shade300,
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: TextButton(
+                        child: const Text(
+                          'Libre',
+                          style: TextStyle(fontWeight: FontWeight.w400),
+                        ),
+                        onPressed: () {},
+                      ),
+                    ),
+                  )
+                ])
+              // Plage horaire libre toute la journée
+              : Container(
+                  margin: const EdgeInsets.only(top: 3, right: 3),
+                  width: 150,
+                  height: (38 * 10),
+                  decoration: BoxDecoration(
+                      color: Colors.amber.shade300,
+                      borderRadius: BorderRadius.circular(5)),
+                  child: Center(
+                    child: TextButton(
+                      child: const Text(
+                        'Libre',
+                        style: TextStyle(fontWeight: FontWeight.w400),
+                      ),
+                      onPressed: () {},
+                    ),
+                  ),
+                )
       ],
     );
   }

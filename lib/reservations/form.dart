@@ -42,8 +42,6 @@ class FormReservations extends StatefulWidget {
   final dynamic dataUser;
   const FormReservations({Key? key, required this.dataUser}) : super(key: key);
 
-  // String dateFin = '';
-
   @override
   State<FormReservations> createState() => _FormReservationsState();
 }
@@ -56,15 +54,21 @@ class _FormReservationsState extends State<FormReservations> {
   // Déinition et initialisation de la valeur par défaut des choix
   int domaine = 1;
   int nomSalle = 5;
-  String periodicite = 'Jour';
-  String type = 'Amphithéâtre';
-  String nomDomaine = 'Plongée sous-marine';
+  String nomDomaine = 'Informatique - multimédia';
+
+  // Variables de récupération des salles du domaine 1
+  late Iterable<dynamic> reservationsDomaine;
 
   // Variables et initialisation des champs de saisie
   var descriptionComplete = TextEditingController();
   var descriptionBreve = TextEditingController();
   String? dateHeureDebut;
   String? dateHeureFin;
+
+  // Récupération des données du planning
+  Future<dynamic> getPlanningData() async {
+    return await api.getPlanningData();
+  }
 
   // Requête de création
   Future<dynamic> createReservation(
@@ -114,7 +118,7 @@ class _FormReservationsState extends State<FormReservations> {
               'FORMULAIRE DE RESERVATION',
               style: TextStyle(
                   color: couleurBleu,
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold),
             ),
           ),
@@ -237,117 +241,7 @@ class _FormReservationsState extends State<FormReservations> {
             },
           ),
           const SizedBox(
-            height: 15,
-          ),
-          // Périodicité de la réservation
-          Row(
-            children: [
-              Container(
-                width: 100,
-                child: const Text(
-                  'Périodicité : ',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: couleurBleu,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: periodicite,
-                  isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      // Modification dynamique
-                      switch (newValue) {
-                        case 'Jour':
-                          domaine = 2;
-                          nomDomaine = newValue!;
-                          break;
-                        case 'Semaine':
-                          domaine = 3;
-                          nomDomaine = newValue!;
-                          break;
-                        default:
-                          domaine = 1;
-                          nomDomaine = newValue!;
-                      }
-                    });
-                  },
-                  items: <String>[
-                    'Jour',
-                    'Semaine',
-                    'Mois',
-                    'Année',
-                    'Année',
-                    'Jour de semaine',
-                    'Jour du mois'
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-          // Type de réservation
-          Row(
-            children: [
-              Container(
-                width: 100,
-                child: const Text(
-                  'Type de réservation : ',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: couleurBleu,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: type,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  isExpanded: true,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      // Modification dynamique
-                      switch (newValue) {
-                        case 'Amphithéâtre':
-                          domaine = 2;
-                          nomDomaine = newValue!;
-                          break;
-                        case 'Réunion':
-                          domaine = 3;
-                          nomDomaine = newValue!;
-                          break;
-                        default:
-                          domaine = 1;
-                          nomDomaine = newValue!;
-                      }
-                    });
-                  },
-                  items: <String>[
-                    'Amphithéâtre',
-                    'Convivialité',
-                    'Salle de réunion'
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+            height: 20,
           ),
           // Sélection du domaine
           Row(
@@ -374,12 +268,12 @@ class _FormReservationsState extends State<FormReservations> {
                     setState(() {
                       // Modification dynamique
                       switch (newValue) {
-                        case 'Pétanque':
+                        case 'Salles de réunion':
                           domaine = 2;
                           nomSalle = 1;
                           nomDomaine = newValue!;
                           break;
-                        case 'Tennis':
+                        case 'Salles de réception':
                           domaine = 3;
                           nomSalle = 6;
                           nomDomaine = newValue!;
@@ -391,8 +285,11 @@ class _FormReservationsState extends State<FormReservations> {
                       }
                     });
                   },
-                  items: <String>['Plongée sous-marine', 'Pétanque', 'Tennis']
-                      .map<DropdownMenuItem<String>>((String value) {
+                  items: <String>[
+                    'Informatique - multimédia',
+                    'Salles de réunion',
+                    'Salles de réception'
+                  ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -420,10 +317,36 @@ class _FormReservationsState extends State<FormReservations> {
                 width: 15,
               ),
               Expanded(
-                child: GetSalles(
-                  indomaine: domaine,
-                  initSalle: nomSalle,
-                ),
+                child: FutureBuilder<dynamic>(
+                    future: getPlanningData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        // Récupération des salles du domaine sélectionné
+                        reservationsDomaine = snapshot.data!['salles']
+                            .where((salle) => salle['area_id'] == domaine);
+                        // Formatage des réservations de chaque salle du domaine sélectionné
+                        return DropdownButton<int>(
+                          value: nomSalle,
+                          icon: const Icon(Icons.arrow_drop_down),
+                          isExpanded: true,
+                          onChanged: (int? newValue) {
+                            setState(() {
+                              // Mise à jour de l'identifiant
+                              nomSalle = newValue!;
+                            });
+                          },
+                          items: reservationsDomaine
+                              .map<DropdownMenuItem<int>>((dynamic value) {
+                            return DropdownMenuItem<int>(
+                              value: value['id'],
+                              child: Text(value['room_name'].toString()),
+                            );
+                          }).toList(),
+                        );
+                      } else {
+                        return const Center(child: Text('Pas de données'));
+                      }
+                    }),
               )
             ],
           ),
@@ -443,35 +366,10 @@ class _FormReservationsState extends State<FormReservations> {
                 child: const Text('Réserver',
                     style: TextStyle(fontSize: 20, letterSpacing: 2)),
                 onPressed: () async {
-                  /*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const Salles(action: 'Modification')));*/
+                  // Vérification des informations du formulaire
                   if (_formKey.currentState!.validate()) {
-                    // Requête
-                    // dynamic reponse = await createReservation(
-                    //     descriptionBreve.text,
-                    //     descriptionComplete.text,
-                    //     dateHeureDebut,
-                    //     currentDate,
-                    //     dateHeureFin,
-                    //     widget.dataUser.id,
-                    //     widget.dataUser.niveauTarif,
-                    //     domaine,
-                    //     nomSalle);
-
-                    print('Requête vers l\'API');
-                    // print(dateHeureDebut! + ' à ' + dateHeureFin!);
-                    // print(dateHeureDebut!);
-                    print(dateHeureFin!);
-                    print('l\'id de l\'utilisateur est : ' +
-                        widget.dataUser.getId().toString());
-                    print('Le domaine est ' + domaine.toString());
-                    print('La salle sélectionneée est ' + nomSalle.toString());
-                    print('Tarif : ' + widget.dataUser.getTarif().toString());
-
-                    /*dynamic reponse = await api.createReservation(
+                    // Requête de création de la réservation
+                    dynamic reponse = await api.createReservation(
                         descriptionBreve.text,
                         descriptionComplete.text,
                         dateHeureDebut,
@@ -499,7 +397,7 @@ class _FormReservationsState extends State<FormReservations> {
                               builder: (context) => Reservations(
                                     userData: widget.dataUser,
                                   )));
-                    }*/
+                    }
                   }
                 },
               ),
@@ -508,124 +406,5 @@ class _FormReservationsState extends State<FormReservations> {
         ],
       ),
     );
-  }
-}
-
-// CLASS DE RECUPERATION DES SALLES
-class GetSalles extends StatefulWidget {
-  int indomaine;
-  int initSalle;
-  GetSalles({Key? key, required this.indomaine, required this.initSalle});
-
-  @override
-  State<GetSalles> createState() => _GetSallesState();
-}
-
-// Formatage du Salles
-class _GetSallesState extends State<GetSalles> {
-  // Variables de récupération des salles du domaine 1
-  late Iterable<dynamic> reservationsDomaine;
-
-  @override
-  void didUpdateWidget(GetSalles planning) {
-    super.didUpdateWidget(planning);
-  }
-
-  // Récupération des données du planning
-  Future<dynamic> getPlanningData() async {
-    return await api.getPlanningData();
-  }
-
-/*
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: getPlanningData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            // Récupération des salles du domaine sélectionné
-            reservationsDomaine = snapshot.data!['salles']
-                .where((salle) => salle['area_id'] == widget.indomaine);
-            // Formatage des réservations de chaque salle du domaine sélectionné
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 100,
-                  child: const Text(
-                    'Salle : ',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: couleurBleu,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-                Expanded(
-                  child: DropdownButton<dynamic>(
-                    value: nomSalle,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    isExpanded: true,
-                    onChanged: (dynamic newValue) {
-                      setState(() {
-                        // Modification dynamique
-                        idSalle = int.parse(newValue!['id']);
-                        nomSalle = newValue!['name'].toString();
-                      });
-                    },
-                    items: reservationsDomaine
-                        .map<DropdownMenuItem<dynamic>>((dynamic value) {
-                      return DropdownMenuItem<dynamic>(
-                        value: {
-                          'id': value['id'],
-                          'name': value['name'],
-                        },
-                        child: Text(value['name'].toString()),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return const Center(child: Text('Pas de données'));
-          }
-        });
-  }
-*/
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: getPlanningData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            // Récupération des salles du domaine sélectionné
-            reservationsDomaine = snapshot.data!['salles']
-                .where((salle) => salle['area_id'] == widget.indomaine);
-            // Formatage des réservations de chaque salle du domaine sélectionné
-            return DropdownButton<int>(
-              value: widget.initSalle,
-              icon: const Icon(Icons.arrow_drop_down),
-              isExpanded: true,
-              onChanged: (int? newValue) {
-                setState(() {
-                  // Mise à jour de l'identifiant
-                  widget.initSalle = newValue!;
-                });
-              },
-              items: reservationsDomaine
-                  .map<DropdownMenuItem<int>>((dynamic value) {
-                return DropdownMenuItem<int>(
-                  value: value['id'],
-                  child: Text(value['room_name'].toString()),
-                );
-              }).toList(),
-            );
-          } else {
-            return const Center(child: Text('Pas de données'));
-          }
-        });
   }
 }

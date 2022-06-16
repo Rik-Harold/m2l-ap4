@@ -21,21 +21,6 @@ class MesReservations extends StatefulWidget {
 }
 
 class _MesReservationsState extends State<MesReservations> {
-  // Déclaration de variable
-  // final idUser;
-
-  // Constructeur
-
-  // Variable de stockage de la donnée
-  // late Future<dynamic> dataUser;
-
-  var listeReservation = [
-    {'name': 'Réservation 1', 'date': '12/11/2021', 'salle': 1, 'domaine': 2},
-    {'name': 'Réservation 2', 'date': '12/11/2021', 'salle': 2, 'domaine': 1},
-    {'name': 'Réservation 3', 'date': '12/11/2021', 'salle': 3, 'domaine': 1},
-    {'name': 'Réservation 4', 'date': '12/11/2021', 'salle': 2, 'domaine': 3}
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,58 +37,21 @@ class _MesReservationsState extends State<MesReservations> {
         backgroundColor: couleurJaune,
       ),
       body: SingleChildScrollView(
-          child: Container(
-        child: Column(children: [
-          const SizedBox(
-            height: 30,
-          ),
-          // DelayedAnimation(
-          //     delay: 1000,
-          //     child: Text(
-          //       widget.dataUser!.email,
-          //       textAlign: TextAlign.center,
-          //     )),
-          // const SizedBox(
-          //   height: 50,
-          // ),
-          for (var reservation in listeReservation)
-            DelayedAnimation(
-                delay: 1500,
-                child: Container(
-                    width: double.infinity,
-                    height: 100,
-                    decoration: BoxDecoration(
-                        color: couleurJaune,
-                        borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 20),
-                    child: Column(
-                      children: [
-                        Text(
-                          reservation['name'].toString(),
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text('Salle ' + reservation['salle'].toString()),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(reservation['date'].toString())
-                      ],
-                    ))),
-          const SizedBox(
-            height: 10,
-          ),
-        ]),
-      )),
+          child: Column(children: [
+        const SizedBox(
+          height: 30,
+        ),
+        // RESERVATIONS DE L'UTILISATEUR COURANT
+        ListeReservation(userData: widget.dataUser),
+        const SizedBox(
+          height: 10,
+        ),
+      ])),
+      // BOUTON FLOTTANT POUR LA CREATION D'UNE RESERVATION
       floatingActionButton: FloatingActionButton(
         backgroundColor: couleurJaune,
         onPressed: () {
-          // Redirection vers l'interface de gestion des salles de réservation pour les visiteurs authentifiés
+          // Redirection vers l'interface de création de réservation
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -111,11 +59,83 @@ class _MesReservationsState extends State<MesReservations> {
                         userData: widget.dataUser,
                       )));
         },
+        // Icone de création
         child: const Icon(
           Icons.add,
           color: couleurBleu,
         ),
       ),
     );
+  }
+}
+
+class ListeReservation extends StatefulWidget {
+  final userData;
+  const ListeReservation({Key? key, required this.userData}) : super(key: key);
+
+  @override
+  State<ListeReservation> createState() => _ListeReservationState();
+}
+
+class _ListeReservationState extends State<ListeReservation> {
+  // Variable de récupération des réservations de l'utilisateur
+  late List<dynamic> reservations;
+
+  // Récupération des données des réservations
+  Future<dynamic> getUserReservation() async {
+    return await api.getReservationUser(widget.userData.getId());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<dynamic>(
+        future: getUserReservation(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            // Récupération des salles du domaine sélectionné
+            reservations = snapshot.data!;
+            // Formatage des réservations de chaque salle du domaine sélectionné
+            return Column(
+              children: [
+                for (var reservation in reservations)
+                  DelayedAnimation(
+                      delay: 1500,
+                      child: Container(
+                          width: double.infinity,
+                          height: 100,
+                          decoration: BoxDecoration(
+                              color: couleurJaune,
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.all(10),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          child: Column(
+                            children: [
+                              Text(
+                                reservation['breve_description'].toString(),
+                                style: const TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text('Du : ' +
+                                  reservation['date_heure_debut'].toString()),
+                              Text('au : ' +
+                                  reservation['date_heure_fin'].toString())
+                            ],
+                          ))),
+              ],
+            );
+          } else {
+            // Notification en cas d'absence de réservations
+            return const Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(
+                  child: Text('Aucune réservation disponible !',
+                      style: TextStyle(fontSize: 17)),
+                ));
+          }
+        });
   }
 }

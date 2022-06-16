@@ -13,149 +13,85 @@ class SelectReservation extends StatefulWidget {
   // Variable de stockage du statut du visiteur
   final String statutUser;
   final dynamic dataUser;
-  final int idReservation;
+  final dynamic reservation;
+  final String nameDomaine;
+  final String nameSalle;
 
   // Constructeur de la class d'accueil avec récupération du statut du visiteur
   const SelectReservation(
       {Key? key,
       required this.statutUser,
       required this.dataUser,
-      required this.idReservation});
+      required this.reservation,
+      required this.nameDomaine,
+      required this.nameSalle});
 
   @override
   State<SelectReservation> createState() => _SelectReservationState();
 }
 
 class _SelectReservationState extends State<SelectReservation> {
-  // Déclaration de variable
-  // final idUser;
-
-  // Constructeur
-
-  // Variable de stockage de la donnée
-  // late Future<dynamic> dataUser;
-
   @override
   Widget build(BuildContext context) {
-    const reservations = [
-      {
-        'id': 1,
-        'name': 'Réunion',
-        'duree': 3,
-        'capacite': 50,
-        'createur': 'Dupont Jean',
-        'date': '2022-06-13'
-      },
-      {
-        'id': 2,
-        'name': 'Séminaire',
-        'duree': 2,
-        'capacite': 30,
-        'createur': 'Dupont Marc',
-        'date': '2022-06-13'
-      },
-      {
-        'id': 3,
-        'name': 'Stage',
-        'duree': 3,
-        'capacite': 18,
-        'createur': 'Mr Pierre',
-        'date': '2022-06-13'
-      },
-      {
-        'id': 4,
-        'name': 'Séminaire',
-        'duree': 2,
-        'capacite': 30,
-        'createur': 'Dupont Marc',
-        'date': '2022-06-14'
-      },
-      {
-        'id': 5,
-        'name': 'Stage',
-        'duree': 3,
-        'capacite': 18,
-        'createur': 'Mr Pierre',
-        'date': '2022-06-14'
-      },
-      {
-        'id': 6,
-        'name': 'Cours de réseau',
-        'duree': 3,
-        'capacite': 30,
-        'createur': 'Mr Rodrigue',
-        'date': '2022-06-12'
-      },
-      {
-        'id': 7,
-        'name': 'Réunion professionnelle',
-        'duree': 4,
-        'capacite': 18,
-        'createur': 'Mr Jean',
-        'date': '2022-06-12'
-      }
-    ];
-    // Initiaisation de la réservation sélectionnée
-    dynamic reservationAffiche = reservations
-        .where((reservation) => reservation['id'] == widget.idReservation);
-
-    // Récupération de la réservation correspondante
-    for (var reserv in reservationAffiche) {
-      reservationAffiche = reserv;
-    }
-
     // Récupération de la page
     return Scaffold(
-      backgroundColor: couleurOrangePale,
-      drawer: widget.statutUser == 'connecte'
-          ? NavBar(
-              userConnect: widget.dataUser,
-            )
-          : null,
-      appBar: AppBar(
-        title: const Text(
-          'Réservation',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Color.fromARGB(192, 253, 250, 236)),
+        backgroundColor: couleurOrangePale,
+        drawer: widget.statutUser == 'connecte'
+            ? NavBar(
+                userConnect: widget.dataUser,
+              )
+            : null,
+        appBar: AppBar(
+          title: const Text(
+            'Réservation',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color.fromARGB(192, 253, 250, 236)),
+          ),
+          backgroundColor: couleurJaune,
         ),
-        backgroundColor: couleurJaune,
-      ),
-      body: SingleChildScrollView(
-          child: Container(
-        child: Column(children: [
-          const SizedBox(
-            height: 40,
-          ),
-          DelayedAnimation(
-              delay: 1000,
-              child: Container(
-                child: Text(reservationAffiche['name']),
-              )),
-          const SizedBox(
-            height: 50,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-        ]),
-      )),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: couleurJaune,
-        onPressed: () {
-          // Redirection vers l'interface de gestion des salles de réservation pour les visiteurs authentifiés
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Reservations(
-                        userData: widget.dataUser,
-                      )));
-        },
-        child: const Icon(
-          Icons.add,
-          color: couleurBleu,
-        ),
-      ),
-    );
+        body: SingleChildScrollView(
+            child: Container(
+          child: Column(children: [
+            const SizedBox(
+              height: 40,
+            ),
+            DelayedAnimation(
+                delay: 1000,
+                child: Column(children: [
+                  Text(
+                    widget.reservation['breve_description'].toUpperCase(),
+                    style: const TextStyle(
+                        fontFamily: 'fantasy',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                        color: couleurJaune,
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                    child: Text(
+                      widget.reservation['description_complete'],
+                      style: const TextStyle(
+                          fontFamily: 'arial', fontSize: 18, letterSpacing: 2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text('SALLE   : ' + widget.nameSalle,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, fontSize: 15)),
+                  Text('DOMAINE : ' + widget.nameDomaine,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, fontSize: 15)),
+                ])),
+          ]),
+        )));
   }
 }
 

@@ -47,8 +47,6 @@ class RequeteApi {
         var dataUser = jsonDecode(res.body);
         // Vérification des statuts de connexion
         if (dataUser['info'] == 'on') {
-          print('Requête de l\'API');
-          print(dataUser['id']);
           // Connexion au compte utilisateur
           final userConnect = User(
               dataUser['id'],
@@ -57,8 +55,6 @@ class RequeteApi {
               dataUser['niveauTarif'],
               dataUser['droitReservation']);
           // Confirmation de la connexion
-          // return {'statut': 'on', 'utilisateur': dataUser['email']};
-          print(userConnect.getId());
           return {'statut': 'on', 'utilisateur': userConnect};
         } else {
           // Traitement en cas de non connexion
@@ -176,7 +172,7 @@ class RequeteApi {
     // TRAITEMENTS
     try {
       // Requête à l'api
-      var res = await http.post(Uri.parse(apiUrl));
+      var res = await http.get(Uri.parse(apiUrl));
       // Traitement de la réponse
       if (res.statusCode == 200) {
         // Récupération des données
@@ -200,7 +196,7 @@ class RequeteApi {
     // TRAITEMENTS
     try {
       // Requête à l'api
-      var res = await http.post(Uri.parse(apiUrl));
+      var res = await http.get(Uri.parse(apiUrl));
       // Traitement de la réponse
       if (res.statusCode == 200) {
         // Récupération des données
